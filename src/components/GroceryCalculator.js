@@ -15,16 +15,23 @@ export default function GroceryCalculator() {
   const [showConfirm, setShowConfirm] = useState(null);
   const [totalProtein, setTotalProtein] = useState(0);
   const [otherAmount, setOtherAmount] = useState(0);
+  const [totalSum, setTotalSum] = useState(0);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "grocery"), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setProducts(data);
+
+      // Подсчет потраченного (всего белка)
       const total = data.reduce((acc, product) => acc + parseFloat(product.spentCost || 0), 0);
       setTotalProtein(total);
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    setTotalSum(totalProtein + otherAmount);
+  }, [totalProtein, otherAmount]);
 
   const addProduct = async () => {
     if (!newProduct.name || !newProduct.plannedQty || !newProduct.plannedCost) return;
@@ -59,7 +66,7 @@ export default function GroceryCalculator() {
   };
 
   return (
-    <div className="p-4 bg-gray-100 min-h-screen relative">
+    <div className="p-4 bg-gray-100 min-h-screen">
       <Card className="bg-white shadow-md rounded-lg p-6">
         <CardContent>
           <h2 className="text-2xl font-bold mb-4 text-gray-900">Калькулятор продуктовой корзины</h2>
@@ -119,28 +126,19 @@ export default function GroceryCalculator() {
         </CardContent>
       </Card>
 
-      <div className="fixed bottom-4 right-4 bg-white bg-opacity-80 shadow-lg rounded-lg p-4 w-64">
-        <p className="font-bold">Всего белка:</p>
-        <Input type="number" value={totalProtein} onChange={e => setTotalProtein(parseFloat(e.target.value) || 0)} />
-        
-        <p className="font-bold mt-2">Остальное:</p>
-        <Input type="number" value={otherAmount} onChange={e => setOtherAmount(parseFloat(e.target.value) || 0)} />
-        
-        <p className="font-bold mt-2">Итого:</p>
-        <Input type="number" value={totalProtein + otherAmount} readOnly />
-      </div>
-
-      {showConfirm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-          <div className="bg-white p-4 rounded-lg shadow-lg text-center">
-            <p>Хотите удалить всю строку для "{showConfirm.name}"?</p>
-            <div className="mt-4 flex justify-center gap-4">
-              <Button onClick={deleteProduct} className="bg-red-500 text-white px-4 py-2 rounded">Да</Button>
-              <Button onClick={() => setShowConfirm(null)} className="bg-gray-300 px-4 py-2 rounded">Нет</Button>
-            </div>
-          </div>
+      {/* Окно с итогами */}
+      <div className="mt-4 w-full flex justify-end">
+        <div className="bg-white bg-opacity-80 shadow-lg rounded-lg p-4 w-64">
+          <p className="font-bold">Всего белка:</p>
+          <Input type="number" value={totalProtein} onChange={e => setTotalProtein(parseFloat(e.target.value) || 0)} />
+          
+          <p className="font-bold mt-2">Остальное:</p>
+          <Input type="number" value={otherAmount} onChange={e => setOtherAmount(parseFloat(e.target.value) || 0)} />
+          
+          <p className="font-bold mt-2">Итого:</p>
+          <Input type="number" value={totalSum} readOnly />
         </div>
-      )}
+      </div>
     </div>
   );
 }
