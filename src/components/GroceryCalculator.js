@@ -1,4 +1,4 @@
-"use client"; // Важно для хуков useState, useEffect!
+"use client";
 
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
@@ -46,6 +46,7 @@ export default function GroceryCalculator() {
       boughtQty: 0,
       spentCost: 0
     });
+
     setNewProduct({ name: "", plannedQty: "", plannedCost: "" });
   };
 
@@ -74,27 +75,11 @@ export default function GroceryCalculator() {
       <Card className="bg-white shadow-md rounded-lg p-6">
         <CardContent>
           <h2 className="text-2xl font-bold mb-4 text-gray-900">Калькулятор продуктовой корзины</h2>
+
           <div className="flex flex-col md:flex-row gap-2 mb-4">
-            <Input
-              className="w-full md:w-auto"
-              placeholder="Продукт"
-              value={newProduct.name}
-              onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
-            />
-            <Input
-              className="w-full md:w-auto"
-              placeholder="Количество (кг)"
-              type="number"
-              value={newProduct.plannedQty}
-              onChange={e => setNewProduct({ ...newProduct, plannedQty: e.target.value })}
-            />
-            <Input
-              className="w-full md:w-auto"
-              placeholder="Стоимость (лари)"
-              type="number"
-              value={newProduct.plannedCost}
-              onChange={e => setNewProduct({ ...newProduct, plannedCost: e.target.value })}
-            />
+            <Input className="w-full md:w-auto" placeholder="Продукт" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} />
+            <Input className="w-full md:w-auto" placeholder="Количество (кг)" type="number" value={newProduct.plannedQty} onChange={e => setNewProduct({ ...newProduct, plannedQty: e.target.value })} />
+            <Input className="w-full md:w-auto" placeholder="Стоимость (лари)" type="number" value={newProduct.plannedCost} onChange={e => setNewProduct({ ...newProduct, plannedCost: e.target.value })} />
             <Button className="w-full md:w-auto" onClick={addProduct}>Добавить</Button>
           </div>
 
@@ -127,34 +112,18 @@ export default function GroceryCalculator() {
                           {product.name}
                         </span>
                       )}
-                      <button
-                        onClick={() => confirmDelete(product.id, product.name)}
-                        className="absolute right-2 top-2 text-red-500 text-sm">
-                        ✖
-                      </button>
+                      <button onClick={() => confirmDelete(product.id, product.name)} className="absolute right-2 top-2 text-red-500 text-sm">✖</button>
                     </TableCell>
                     <TableCell className="p-2 border border-gray-300">{product.plannedQty} кг</TableCell>
                     <TableCell className="p-2 border border-gray-300">
-                      <Input
-                        type="number"
-                        value={product.boughtQty}
-                        onChange={e => updateProduct(product.id, "boughtQty", e.target.value)}
-                      />
+                      <Input type="number" value={product.boughtQty} onChange={e => updateProduct(product.id, "boughtQty", e.target.value)} />
                     </TableCell>
                     <TableCell className="p-2 border border-gray-300">{product.plannedCost} лари</TableCell>
                     <TableCell className="p-2 border border-gray-300">
-                      <Input
-                        type="number"
-                        value={product.spentCost}
-                        onChange={e => updateProduct(product.id, "spentCost", e.target.value)}
-                      />
+                      <Input type="number" value={product.spentCost} onChange={e => updateProduct(product.id, "spentCost", e.target.value)} />
                     </TableCell>
-                    <TableCell className="p-2 border border-gray-300">
-                      {(product.plannedQty - product.boughtQty).toFixed(2)} кг
-                    </TableCell>
-                    <TableCell className="p-2 border border-gray-300">
-                      {(product.plannedCost - product.spentCost).toFixed(2)} лари
-                    </TableCell>
+                    <TableCell className="p-2 border border-gray-300">{(product.plannedQty - product.boughtQty).toFixed(2)} кг</TableCell>
+                    <TableCell className="p-2 border border-gray-300">{(product.plannedCost - product.spentCost).toFixed(2)} лари</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -167,17 +136,15 @@ export default function GroceryCalculator() {
         <div className="bg-white bg-opacity-80 shadow-lg rounded-lg p-4 w-64">
           <p className="font-bold">Всего белка:</p>
           <Input type="number" value={totalProtein} onChange={e => setTotalProtein(parseFloat(e.target.value) || 0)} />
-
           <p className="font-bold mt-2">Остальное:</p>
           <Input type="number" value={otherAmount} onChange={e => setOtherAmount(parseFloat(e.target.value) || 0)} />
-
           <p className="font-bold mt-2">Итого:</p>
           <Input type="number" value={totalSum} readOnly />
         </div>
       </div>
 
       {showConfirm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <p>Вы действительно хотите удалить все значения поля <b>{showConfirm.name}</b>?</p>
             <div className="mt-4 flex justify-center gap-4">
