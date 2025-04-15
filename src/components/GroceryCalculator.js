@@ -22,7 +22,6 @@ export default function GroceryCalculator() {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setProducts(data);
 
-      // Подсчет потраченного (всего белка)
       const total = data.reduce((acc, product) => acc + parseFloat(product.spentCost || 0), 0);
       setTotalProtein(total);
     });
@@ -34,11 +33,16 @@ export default function GroceryCalculator() {
   }, [totalProtein, otherAmount]);
 
   const addProduct = async () => {
-    if (!newProduct.name || !newProduct.plannedQty || !newProduct.plannedCost) return;
+    const name = newProduct.name.trim();
+    const qty = parseFloat(newProduct.plannedQty);
+    const cost = parseFloat(newProduct.plannedCost);
+
+    if (!name || isNaN(qty) || isNaN(cost)) return;
+
     await addDoc(collection(db, "grocery"), {
-      name: newProduct.name,
-      plannedQty: parseFloat(newProduct.plannedQty),
-      plannedCost: parseFloat(newProduct.plannedCost),
+      name,
+      plannedQty: qty,
+      plannedCost: cost,
       boughtQty: 0,
       spentCost: 0
     });
@@ -71,13 +75,29 @@ export default function GroceryCalculator() {
         <CardContent>
           <h2 className="text-2xl font-bold mb-4 text-gray-900">Калькулятор продуктовой корзины</h2>
           <div className="flex flex-col md:flex-row gap-2 mb-4">
-            <Input className="w-full md:w-auto" placeholder="Продукт" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} />
-            <Input className="w-full md:w-auto" placeholder="Количество (кг)" type="number" value={newProduct.plannedQty} onChange={e => setNewProduct({ ...newProduct, plannedQty: e.target.value })} />
-            <Input className="w-full md:w-auto" placeholder="Стоимость (лари)" type="number" value={newProduct.plannedCost} onChange={e => setNewProduct({ ...newProduct, plannedCost: e.target.value })} />
+            <Input
+              className="w-full md:w-auto"
+              placeholder="Продукт"
+              value={newProduct.name}
+              onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
+            />
+            <Input
+              className="w-full md:w-auto"
+              placeholder="Количество (кг)"
+              type="number"
+              value={newProduct.plannedQty}
+              onChange={e => setNewProduct({ ...newProduct, plannedQty: e.target.value })}
+            />
+            <Input
+              className="w-full md:w-auto"
+              placeholder="Стоимость (лари)"
+              type="number"
+              value={newProduct.plannedCost}
+              onChange={e => setNewProduct({ ...newProduct, plannedCost: e.target.value })}
+            />
             <Button className="w-full md:w-auto" onClick={addProduct}>Добавить</Button>
           </div>
 
-          {/* Таблица с адаптацией под мобильные */}
           <div className="overflow-x-auto w-full">
             <Table className="w-full border-collapse border border-gray-300">
               <TableHeader className="bg-gray-200">
@@ -107,22 +127,34 @@ export default function GroceryCalculator() {
                           {product.name}
                         </span>
                       )}
-                      <button 
-                        onClick={() => confirmDelete(product.id, product.name)} 
+                      <button
+                        onClick={() => confirmDelete(product.id, product.name)}
                         className="absolute right-2 top-2 text-red-500 text-sm">
                         ✖
                       </button>
                     </TableCell>
                     <TableCell className="p-2 border border-gray-300">{product.plannedQty} кг</TableCell>
                     <TableCell className="p-2 border border-gray-300">
-                      <Input type="number" value={product.boughtQty} onChange={e => updateProduct(product.id, "boughtQty", e.target.value)} />
+                      <Input
+                        type="number"
+                        value={product.boughtQty}
+                        onChange={e => updateProduct(product.id, "boughtQty", e.target.value)}
+                      />
                     </TableCell>
                     <TableCell className="p-2 border border-gray-300">{product.plannedCost} лари</TableCell>
                     <TableCell className="p-2 border border-gray-300">
-                      <Input type="number" value={product.spentCost} onChange={e => updateProduct(product.id, "spentCost", e.target.value)} />
+                      <Input
+                        type="number"
+                        value={product.spentCost}
+                        onChange={e => updateProduct(product.id, "spentCost", e.target.value)}
+                      />
                     </TableCell>
-                    <TableCell className="p-2 border border-gray-300">{(product.plannedQty - product.boughtQty).toFixed(2)} кг</TableCell>
-                    <TableCell className="p-2 border border-gray-300">{(product.plannedCost - product.spentCost).toFixed(2)} лари</TableCell>
+                    <TableCell className="p-2 border border-gray-300">
+                      {(product.plannedQty - product.boughtQty).toFixed(2)} кг
+                    </TableCell>
+                    <TableCell className="p-2 border border-gray-300">
+                      {(product.plannedCost - product.spentCost).toFixed(2)} лари
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -131,21 +163,19 @@ export default function GroceryCalculator() {
         </CardContent>
       </Card>
 
-      {/* Окно с итогами */}
       <div className="mt-4 w-full flex justify-end">
         <div className="bg-white bg-opacity-80 shadow-lg rounded-lg p-4 w-64">
           <p className="font-bold">Всего белка:</p>
           <Input type="number" value={totalProtein} onChange={e => setTotalProtein(parseFloat(e.target.value) || 0)} />
-          
+
           <p className="font-bold mt-2">Остальное:</p>
           <Input type="number" value={otherAmount} onChange={e => setOtherAmount(parseFloat(e.target.value) || 0)} />
-          
+
           <p className="font-bold mt-2">Итого:</p>
           <Input type="number" value={totalSum} readOnly />
         </div>
       </div>
 
-      {/* Окно подтверждения удаления */}
       {showConfirm && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
